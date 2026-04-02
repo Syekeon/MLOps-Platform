@@ -1,0 +1,9 @@
+output "log_analytics_name" { value = local.log_analytics_name }
+output "application_insights_name" { value = local.application_insights_name }
+output "key_vault_name" { value = local.key_vault_name }
+output "aml_workspace_name" { value = local.aml_workspace_name }
+output "runner_vm_name" { value = local.runner_vm_name }
+output "runner_nic_name" { value = local.runner_nic_name }
+output "compute_identity_name" { value = local.compute_identity_name }
+output "storage_account_name" { value = local.storage_account_name }
+output "acr_name" { value = local.acr_name }

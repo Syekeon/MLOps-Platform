@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+
+name: train-iris-env
+version: 1
+
+image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04:latest
+
+conda_file:
+  channels:
+    - conda-forge
+  dependencies:
+    - python=3.10
+    - pip
+    - pip:
+        - scikit-learn==1.5.2
+        - joblib==1.4.2

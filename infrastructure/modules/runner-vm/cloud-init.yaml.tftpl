@@ -1,0 +1,46 @@
+#cloud-config
+package_update: false
+package_upgrade: false
+
+runcmd:
+  - |
+      cat >/usr/local/bin/runner-bootstrap.sh <<'EOF'
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      retry() {
+        local attempts="$1"
+        shift
+        local n=1
+        until "$@"; do
+          if [ "$n" -ge "$attempts" ]; then
+            return 1
+          fi
+          n=$((n + 1))
+          sleep 10
+        done
+      }
+
+      export DEBIAN_FRONTEND=noninteractive
+
+      retry 6 apt-get update
+      retry 6 apt-get install -y ca-certificates curl gnupg lsb-release jq unzip git docker.io
+
+      systemctl enable docker
+      systemctl start docker
+      usermod -aG docker ${admin_username}
+
+      curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+      curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" >/etc/apt/sources.list.d/hashicorp.list
+
+      retry 6 apt-get update
+      retry 6 apt-get install -y terraform
+
+      runuser -l ${admin_username} -c "az extension add --name ml --yes"
+
+      echo "runner bootstrap completed" >/var/log/runner-bootstrap.log
+      EOF
+  - chmod +x /usr/local/bin/runner-bootstrap.sh
+  - /usr/local/bin/runner-bootstrap.sh

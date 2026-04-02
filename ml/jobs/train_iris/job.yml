@@ -1,0 +1,18 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+code: ./src
+command: >-
+  python train.py
+  --model_output ${{outputs.model_output}}
+
+environment: azureml://registries/azureml/environments/sklearn-1.5/labels/latest
+compute: azureml:cpu-cluster-stg
+
+display_name: train-iris-smoke-test
+experiment_name: smoke-tests
+description: Smoke test minimo para validar el AML Compute Cluster privado.
+
+outputs:
+  model_output:
+    type: uri_folder
+    mode: rw_mount

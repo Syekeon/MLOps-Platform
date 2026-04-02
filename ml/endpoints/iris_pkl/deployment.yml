@@ -1,0 +1,49 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+
+name: blue
+endpoint_name: iris-pkl-stg
+
+tags:
+  project: mlops
+  environment: staging
+  owner: tfm
+  cost_center: master
+
+model: azureml:iris-rf-model:1
+
+environment:
+  image: mcr.microsoft.com/azureml/minimal-ubuntu22.04-py39-cpu-inference:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.9
+      - pip
+      - pip:
+          - azureml-inference-server-http
+          - scikit-learn==1.5.2
+          - joblib==1.4.2
+
+code_configuration:
+  code: .
+  scoring_script: score.py
+
+instance_type: Standard_DS2_v2
+instance_count: 1
+
+request_settings:
+  request_timeout_ms: 15000
+
+liveness_probe:
+  initial_delay: 30
+  period: 10
+  timeout: 2
+  success_threshold: 1
+  failure_threshold: 30
+
+readiness_probe:
+  initial_delay: 30
+  period: 10
+  timeout: 2
+  success_threshold: 1
+  failure_threshold: 30

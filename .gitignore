@@ -1,0 +1,32 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+config/staging.env
+infrastructure/envs/staging/terraform.tfvars
+infrastructure/backend/backend-staging.hcl
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Variables sensibles/locales
+*.auto.tfvars
+*.auto.tfvars.json
+terraform.tfvars
+terraform.tfvars.json
+config/*.env
+config/*.local
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

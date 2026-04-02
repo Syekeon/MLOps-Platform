@@ -1,0 +1,15 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
+
+name: iris-pkl-stg
+auth_mode: key
+public_network_access: disabled
+identity:
+  type: user_assigned
+  user_assigned_identities:
+    - resource_id: /subscriptions/<subscription-id>/resourceGroups/<workload-resource-group>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<endpoint-identity-name>
+
+tags:
+  project: mlops
+  environment: staging
+  owner: tfm
+  cost_center: master

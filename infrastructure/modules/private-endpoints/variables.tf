@@ -1,0 +1,16 @@
+variable "resource_group_name" { type = string }
+variable "location" { type = string }
+variable "private_endpoints_subnet_id" { type = string }
+variable "enable_private_networking" { type = bool }
+variable "storage_account_id" { type = string }
+variable "key_vault_id" { type = string }
+variable "acr_id" { type = string }
+variable "aml_workspace_id" { type = string }
+variable "private_dns_zone_id_blob_core_windows_net" { type = string }
+variable "private_dns_zone_id_file_core_windows_net" { type = string }
+variable "private_dns_zone_id_dfs_core_windows_net" { type = string }
+variable "private_dns_zone_id_vaultcore_azure_net" { type = string }
+variable "private_dns_zone_id_azurecr_io" { type = string }
+variable "private_dns_zone_id_api_azureml_ms" { type = string }
+variable "private_dns_zone_id_notebooks_azure_net" { type = string }
+variable "tags" { type = map(string) }

@@ -1,0 +1,10 @@
+variable "resource_group_name" { type = string }
+variable "location" { type = string }
+variable "workspace_name" { type = string }
+variable "application_insights_id" { type = string }
+variable "key_vault_id" { type = string }
+variable "storage_account_id" { type = string }
+variable "container_registry_id" { type = string }
+variable "enable_private_networking" { type = bool }
+variable "managed_network_isolation_mode" { type = string }
+variable "tags" { type = map(string) }
