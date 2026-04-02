@@ -2,9 +2,6 @@
 *.tfstate
 *.tfstate.*
 crash.log
-config/staging.env
-infrastructure/envs/staging/terraform.tfvars
-infrastructure/backend/backend-staging.hcl
 
 # Terraform
 **/.terraform/*
