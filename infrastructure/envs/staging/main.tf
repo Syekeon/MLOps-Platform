@@ -372,8 +372,8 @@ module "aml_compute_cluster" {
   vm_size             = var.aml_compute_vm_size
   min_instances       = var.aml_compute_min_instances
   max_instances       = var.aml_compute_max_instances
-  enable_node_public_ip = var.managed_network_isolation_mode == "Disabled" ? false : true
-  ssh_public_access_enabled = var.managed_network_isolation_mode == "Disabled" ? false : true
+  enable_node_public_ip = var.managed_network_isolation_mode == "Disabled" ? true : false
+  ssh_public_access_enabled = var.managed_network_isolation_mode == "Disabled" ? true : false
   admin_username      = var.runner_admin_username
   admin_password      = var.runner_admin_password
   tags                = module.governance.tags
