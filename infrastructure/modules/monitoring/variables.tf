@@ -58,3 +58,8 @@ variable "tags" {
   type        = map(string)
   description = "Tags comunes"
 }
+
+variable "shared_action_group_id" {
+  type        = string
+  description = "ID del Action Group ag-platform-alerts del Hub-Core"
+}

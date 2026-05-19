@@ -451,5 +451,6 @@ module "monitoring" {
   compute_cluster_name         = var.aml_compute_name
   action_group_name            = var.monitoring_action_group_name
   alert_emails                 = var.monitoring_alert_emails
+  shared_action_group_id       = var.shared_action_group_id
   tags                         = module.governance.tags
 }

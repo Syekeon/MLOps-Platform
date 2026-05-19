@@ -1,21 +1,3 @@
-# ============================================================
-# Action Group — destinatarios de las alertas
-# ============================================================
-resource "azurerm_monitor_action_group" "mlops_alerts" {
-  name                = var.action_group_name
-  resource_group_name = var.workload_resource_group_name
-  short_name          = "mlops"
-  tags                = var.tags
-
-  dynamic "email_receiver" {
-    for_each = var.alert_emails
-    content {
-      name                    = "email-${index(var.alert_emails, email_receiver.value)}"
-      email_address           = email_receiver.value
-      use_common_alert_schema = true
-    }
-  }
-}
 
 # ============================================================
 # Alerta 1 — Pipeline de entrenamiento fallido
@@ -55,7 +37,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "pipeline_failed" {
   }
 
   action {
-    action_groups = [azurerm_monitor_action_group.mlops_alerts.id]
+    action_groups = [var.shared_action_group_id]
   }
 }
 
@@ -101,7 +83,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "endpoint_error_rate" 
   }
 
   action {
-    action_groups = [azurerm_monitor_action_group.mlops_alerts.id]
+    action_groups = [var.shared_action_group_id]
   }
 }
 
@@ -142,7 +124,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "endpoint_high_latency
   }
 
   action {
-    action_groups = [azurerm_monitor_action_group.mlops_alerts.id]
+    action_groups = [var.shared_action_group_id]
   }
 }
 
@@ -183,7 +165,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "no_training_24h" {
   }
 
   action {
-    action_groups = [azurerm_monitor_action_group.mlops_alerts.id]
+    action_groups = [var.shared_action_group_id]
   }
 }
 
@@ -225,7 +207,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "compute_no_capacity" 
   }
 
   action {
-    action_groups = [azurerm_monitor_action_group.mlops_alerts.id]
+    action_groups = [var.shared_action_group_id]
   }
 }
 

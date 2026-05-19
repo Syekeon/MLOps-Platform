@@ -66,3 +66,8 @@ variable "monitoring_endpoint_name" {
   description = "Nombre del endpoint de staging a monitorizar"
   default     = "iris-endpoint-stg-weu-01"
 }
+
+variable "shared_action_group_id" {
+  type        = string
+  description = "ID del Action Group ag-platform-alerts del Hub-Core"
+}

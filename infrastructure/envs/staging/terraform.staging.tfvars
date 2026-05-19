@@ -56,3 +56,5 @@ monitoring_alert_emails = [
   "srgn807@gmail.com",
   "juancarlos.magro@dxc.com"
 ]
+
+shared_action_group_id = "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.Insights/actionGroups/ag-platform-alerts"
