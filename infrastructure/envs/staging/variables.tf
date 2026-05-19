@@ -49,3 +49,20 @@ variable "github_main_branch" { type = string }
 variable "github_oidc_role_definition_name" { type = string }
 variable "tag_owner" { type = string }
 variable "tag_cost_center" { type = string }
+
+variable "monitoring_alert_emails" {
+  type        = list(string)
+  description = "Lista de emails que reciben alertas de monitorización"
+}
+
+variable "monitoring_action_group_name" {
+  type        = string
+  description = "Nombre del action group de alertas"
+  default     = "iris-mlops-alerts-group"
+}
+
+variable "monitoring_endpoint_name" {
+  type        = string
+  description = "Nombre del endpoint de staging a monitorizar"
+  default     = "iris-endpoint-stg-weu-01"
+}

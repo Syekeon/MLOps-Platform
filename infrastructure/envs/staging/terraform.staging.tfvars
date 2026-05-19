@@ -46,3 +46,13 @@ github_main_branch                        = "main"
 github_oidc_role_definition_name          = "Owner"
 tag_owner                                 = "tfm"
 tag_cost_center                           = "master"
+
+monitoring_action_group_name = "iris-mlops-alerts-group"
+monitoring_endpoint_name     = "iris-endpoint-stg-weu-01"
+monitoring_alert_emails = [
+  "luis-alberto.fernanz-esteban@dxc.com",
+  "david.ca.2993@gmail.com",
+  "rubendiazblanco02@gmail.com",
+  "srgn807@gmail.com",
+  "juancarlos.magro@dxc.com"
+]

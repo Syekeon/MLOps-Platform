@@ -436,3 +436,20 @@ module "diag_spoke_vnet" {
   target_resource_id         = module.spoke_network.spoke_vnet_id
   log_analytics_workspace_id = var.shared_log_analytics_workspace_id
 }
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+
+  environment                  = var.environment
+  location                     = var.location
+  workload_resource_group_name = module.resource_groups.resource_group_name
+  log_analytics_workspace_id   = var.shared_log_analytics_workspace_id
+  application_insights_id      = var.shared_application_insights_id
+  aml_workspace_id             = module.aml_workspace.id
+  aml_workspace_name           = module.naming.aml_workspace_name
+  endpoint_name                = var.monitoring_endpoint_name
+  compute_cluster_name         = var.aml_compute_name
+  action_group_name            = var.monitoring_action_group_name
+  alert_emails                 = var.monitoring_alert_emails
+  tags                         = module.governance.tags
+}
