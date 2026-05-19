@@ -58,3 +58,6 @@ monitoring_alert_emails = [
 ]
 
 shared_action_group_id = "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.Insights/actionGroups/ag-platform-alerts"
+
+monitoring_budget_amount      = 1
+monitoring_endpoint_prod_name = "iris-endpoint-prod-weu-01"

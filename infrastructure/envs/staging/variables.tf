@@ -1,4 +1,3 @@
-variable "subscription_id" { type = string }
 variable "location" { type = string }
 variable "location_short" { type = string }
 variable "workload" { type = string }
@@ -70,4 +69,21 @@ variable "monitoring_endpoint_name" {
 variable "shared_action_group_id" {
   type        = string
   description = "ID del Action Group ag-platform-alerts del Hub-Core"
+}
+
+variable "subscription_id" {
+  type        = string
+  description = "ID de la suscripción de Azure"
+}
+
+variable "monitoring_budget_amount" {
+  type        = number
+  description = "Presupuesto mensual en euros"
+  default     = 1
+}
+
+variable "monitoring_endpoint_prod_name" {
+  type        = string
+  description = "Nombre del endpoint de producción"
+  default     = "iris-endpoint-prod-weu-01"
 }

@@ -63,3 +63,26 @@ variable "shared_action_group_id" {
   type        = string
   description = "ID del Action Group ag-platform-alerts del Hub-Core"
 }
+
+variable "runner_vm_name" {
+  type        = string
+  description = "Nombre de la runner VM"
+  default     = "vm-mlops-stg-runner-weu-01"
+}
+
+variable "subscription_id" {
+  type        = string
+  description = "ID de la suscripción de Azure"
+}
+
+variable "monthly_budget_amount" {
+  type        = number
+  description = "Presupuesto mensual en euros"
+  default     = 1
+}
+
+variable "endpoint_prod_name" {
+  type        = string
+  description = "Nombre del endpoint de producción"
+  default     = "iris-endpoint-prod-weu-01"
+}

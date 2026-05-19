@@ -452,5 +452,9 @@ module "monitoring" {
   action_group_name            = var.monitoring_action_group_name
   alert_emails                 = var.monitoring_alert_emails
   shared_action_group_id       = var.shared_action_group_id
+  subscription_id              = var.subscription_id
+  runner_vm_name               = "vm-mlops-stg-runner-weu-01"
+  monthly_budget_amount        = var.monitoring_budget_amount
+  endpoint_prod_name           = var.monitoring_endpoint_prod_name
   tags                         = module.governance.tags
 }
