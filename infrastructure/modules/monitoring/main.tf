@@ -309,8 +309,10 @@ resource "azurerm_consumption_budget_resource_group" "mlops_budget" {
 }
 
 # ============================================================
+
+# ============================================================
 # Dashboard — MLOps Platform - Model Monitoring
-# 4 secciones: Infraestructura → ML Pipeline → Endpoints → Costes
+# JSON exportado desde el portal y convertido al formato Terraform
 # ============================================================
 resource "azurerm_portal_dashboard" "mlops_monitoring" {
   name                = "dashboard-mlops-staging-weu-01"
@@ -319,197 +321,1053 @@ resource "azurerm_portal_dashboard" "mlops_monitoring" {
   tags                = merge(var.tags, { hidden-title = "MLOps Platform - Model Monitoring" })
 
   dashboard_properties = jsonencode({
-    lenses = {
-      # ── Sección 1: INFRAESTRUCTURA ──────────────────────
-      "0" = {
-        order = 0
-        parts = {
-          # Runner VM disponibilidad
-          "0" = {
-            position = { x = 0, y = 0, colSpan = 4, rowSpan = 3 }
-            metadata = {
-              type = "Extension/Microsoft_Azure_Monitoring/PartType/MetricsChartPart"
-              inputs = [
-                { name = "resourceId", value = "/subscriptions/${var.subscription_id}/resourceGroups/${var.workload_resource_group_name}/providers/Microsoft.Compute/virtualMachines/${var.runner_vm_name}" },
-                { name = "timespan", value = { relative = { duration = 86400000 } } },
-                { name = "chartType", value = 0 },
-                { name = "metrics", value = [{ resourceMetadata = { id = "/subscriptions/${var.subscription_id}/resourceGroups/${var.workload_resource_group_name}/providers/Microsoft.Compute/virtualMachines/${var.runner_vm_name}" }, name = "VmAvailabilityMetric", aggregationType = 4, metricVisualization = { displayName = "Disponibilidad" } }] },
-                { name = "title", value = "🖥️ Runner VM - Disponibilidad" }
-              ]
+  "lenses": {
+    "0": {
+      "order": 0,
+      "parts": {
+        "0": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "colSpan": 15,
+            "rowSpan": 1
+          },
+          "metadata": {
+            "inputs": [],
+            "type": "Extension/HubsExtension/PartType/MarkdownPart",
+            "settings": {
+              "content": {
+                "content": "---",
+                "title": "🖥️ INFRAESTRUCTURA",
+                "subtitle": "Runner VM · Compute Cluster · Red",
+                "markdownSource": 1,
+                "markdownUri": ""
+              }
             }
           }
-          # Runner VM CPU
-          "1" = {
-            position = { x = 4, y = 0, colSpan = 4, rowSpan = 3 }
-            metadata = {
-              type = "Extension/Microsoft_Azure_Monitoring/PartType/MetricsChartPart"
-              inputs = [
-                { name = "resourceId", value = "/subscriptions/${var.subscription_id}/resourceGroups/${var.workload_resource_group_name}/providers/Microsoft.Compute/virtualMachines/${var.runner_vm_name}" },
-                { name = "timespan", value = { relative = { duration = 86400000 } } },
-                { name = "chartType", value = 0 },
-                { name = "metrics", value = [{ resourceMetadata = { id = "/subscriptions/${var.subscription_id}/resourceGroups/${var.workload_resource_group_name}/providers/Microsoft.Compute/virtualMachines/${var.runner_vm_name}" }, name = "Percentage CPU", aggregationType = 4, metricVisualization = { displayName = "CPU (%)" } }] },
-                { name = "title", value = "🖥️ Runner VM - CPU (%)" }
-              ]
+        },
+        "1": {
+          "position": {
+            "x": 0,
+            "y": 1,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "options",
+                "isOptional": true
+              },
+              {
+                "name": "sharedTimeRange",
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+            "settings": {
+              "content": {
+                "options": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "resourceMetadata": {
+                          "id": "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/RG-MLOPS-WORKLOAD-STG-WEU-01/providers/Microsoft.Compute/virtualMachines/VM-MLOPS-STG-RUNNER-WEU-01"
+                        },
+                        "name": "Percentage CPU",
+                        "aggregationType": 4,
+                        "namespace": "microsoft.compute/virtualmachines",
+                        "metricVisualization": {
+                          "displayName": "Percentage CPU",
+                          "resourceDisplayName": "vm-mlops-stg-runner-weu-01"
+                        }
+                      }
+                    ],
+                    "title": "🖥️ Runner VM CPU",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2,
+                      "legendVisualization": {
+                        "isVisible": true,
+                        "position": 2,
+                        "hideHoverCard": false,
+                        "hideLabelNames": true
+                      },
+                      "axisVisualization": {
+                        "x": {
+                          "isVisible": true,
+                          "axisType": 2
+                        },
+                        "y": {
+                          "isVisible": true,
+                          "axisType": 1
+                        }
+                      },
+                      "disablePinning": true
+                    }
+                  }
+                }
+              }
             }
           }
-          # Compute cluster eventos
-          "2" = {
-            position = { x = 8, y = 0, colSpan = 4, rowSpan = 3 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlComputeClusterEvent\n| where ClusterName == \"${var.compute_cluster_name}\"\n| summarize Eventos = count() by EventType, bin(TimeGenerated, 1h)\n| render barchart" },
-                { name = "TimeRange", value = "P1D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "⚙️ Compute Cluster - Estado" },
-                { name = "PartSubTitle", value = var.compute_cluster_name }
-              ]
+        },
+        "2": {
+          "position": {
+            "x": 5,
+            "y": 1,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "options",
+                "isOptional": true
+              },
+              {
+                "name": "sharedTimeRange",
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+            "settings": {
+              "content": {
+                "options": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "resourceMetadata": {
+                          "id": "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/RG-MLOPS-WORKLOAD-STG-WEU-01/providers/Microsoft.Compute/virtualMachines/VM-MLOPS-STG-RUNNER-WEU-01"
+                        },
+                        "name": "VmAvailabilityMetric",
+                        "aggregationType": 4,
+                        "namespace": "microsoft.compute/virtualmachines",
+                        "metricVisualization": {
+                          "displayName": "VM Availability Metric (Preview)",
+                          "resourceDisplayName": "vm-mlops-stg-runner-weu-01"
+                        }
+                      }
+                    ],
+                    "title": "🖥️ Runner VM - Disponibilidad",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2,
+                      "legendVisualization": {
+                        "isVisible": true,
+                        "position": 2,
+                        "hideHoverCard": false,
+                        "hideLabelNames": true
+                      },
+                      "axisVisualization": {
+                        "x": {
+                          "isVisible": true,
+                          "axisType": 2
+                        },
+                        "y": {
+                          "isVisible": true,
+                          "axisType": 1
+                        }
+                      },
+                      "disablePinning": true
+                    }
+                  }
+                }
+              }
             }
           }
-        }
-      }
-      # ── Sección 2: ML PIPELINE ──────────────────────────
-      "1" = {
-        order = 1
-        parts = {
-          # Jobs éxito vs fallo
-          "0" = {
-            position = { x = 0, y = 3, colSpan = 6, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlComputeJobEvent\n| where ClusterId contains \"${var.compute_cluster_name}\"\n| summarize count() by EventType, bin(TimeGenerated, 1d)\n| render barchart" },
-                { name = "TimeRange", value = "P7D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🤖 Jobs de entrenamiento - Éxitos vs Fallos" },
-                { name = "PartSubTitle", value = "Últimos 7 días" }
-              ]
+        },
+        "3": {
+          "position": {
+            "x": 10,
+            "y": 1,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "00988eba-0d89-43cd-b845-c3f3513381b5",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlComputeClusterEvent\n| where ClusterName == \"cpu-cluster-stg\"\n| summarize Eventos = count() by EventType, bin(TimeGenerated, 1h)\n| render barchart\n\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "StackedBar",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "xAxis": {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Eventos",
+                      "type": "long"
+                    }
+                  ],
+                  "splitBy": [
+                    {
+                      "name": "EventType",
+                      "type": "string"
+                    }
+                  ],
+                  "aggregation": "Sum"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "⚙️ Compute Cluster - Eventos por tipo",
+              "subtitle": ""
             }
           }
-          # Modelos registrados
-          "1" = {
-            position = { x = 6, y = 3, colSpan = 6, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlModelsEvent\n| where OperationName == \"Microsoft.MachineLearningServices/workspaces/models/versions/write\"\n| summarize Registros = count() by bin(TimeGenerated, 1d)\n| render timechart" },
-                { name = "TimeRange", value = "P30D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🤖 Versiones del modelo registradas" },
-                { name = "PartSubTitle", value = "Últimos 30 días" }
-              ]
+        },
+        "4": {
+          "position": {
+            "x": 0,
+            "y": 4,
+            "colSpan": 15,
+            "rowSpan": 1
+          },
+          "metadata": {
+            "inputs": [],
+            "type": "Extension/HubsExtension/PartType/MarkdownPart",
+            "settings": {
+              "content": {
+                "content": "---\n",
+                "title": "🤖 ML PIPELINE",
+                "subtitle": "Entrenamiento · Modelos · Jobse",
+                "markdownSource": 1,
+                "markdownUri": ""
+              }
             }
           }
-          # Resumen jobs tabla
-          "2" = {
-            position = { x = 0, y = 7, colSpan = 12, rowSpan = 3 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlComputeJobEvent\n| where ClusterId contains \"${var.compute_cluster_name}\"\n| where EventType == \"JobSucceeded\" or EventType == \"JobFailed\"\n| summarize TotalJobs = count(), Exitosos = countif(EventType == \"JobSucceeded\"), Fallidos = countif(EventType == \"JobFailed\") by bin(TimeGenerated, 1d)\n| render table" },
-                { name = "TimeRange", value = "P30D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🤖 Resumen diario de jobs (últimos 30 días)" },
-                { name = "PartSubTitle", value = "Total · Exitosos · Fallidos" }
-              ]
+        },
+        "5": {
+          "position": {
+            "x": 0,
+            "y": 5,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "4521d37e-99f6-4c8a-a105-5d1a6331d655",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlModelsEvent\n| where OperationName == \"Microsoft.MachineLearningServices/workspaces/models/versions/write\"\n| summarize Registros = count() by bin(TimeGenerated, 1d)\n| render timechart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🤖 Versiones del modelo registradas (últimos 30 días)",
+              "subtitle": ""
             }
           }
-        }
-      }
-      # ── Sección 3: ENDPOINTS ────────────────────────────
-      "2" = {
-        order = 2
-        parts = {
-          # Peticiones staging
-          "0" = {
-            position = { x = 0, y = 10, colSpan = 4, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"${var.endpoint_name}\"\n| summarize Peticiones = count() by bin(TimeGenerated, 1h)\n| render timechart" },
-                { name = "TimeRange", value = "P1D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🌐 Peticiones al endpoint staging" },
-                { name = "PartSubTitle", value = var.endpoint_name }
-              ]
+        },
+        "6": {
+          "position": {
+            "x": 5,
+            "y": 5,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "14c957d4-2aba-40bd-a18c-0f04bf533c9a",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlComputeJobEvent\n| where ClusterId contains \"cpu-cluster-stg\"\n| summarize count() by EventType, bin(TimeGenerated, 1d)\n| render barchart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🤖 Jobs de entrenamiento - Éxitos vs Fallos (últimos 7 días)",
+              "subtitle": ""
             }
           }
-          # Tasa errores staging
-          "1" = {
-            position = { x = 4, y = 10, colSpan = 4, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"${var.endpoint_name}\"\n| summarize Total = count(), Errores = countif(ResponseCode >= 500) by bin(TimeGenerated, 1h)\n| extend TasaErrores = (Errores * 100.0) / Total\n| project TimeGenerated, TasaErrores\n| render timechart" },
-                { name = "TimeRange", value = "P1D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🌐 Tasa de errores staging (%)" },
-                { name = "PartSubTitle", value = "Umbral crítico: 5%" }
-              ]
+        },
+        "7": {
+          "position": {
+            "x": 10,
+            "y": 5,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "1116f72c-0085-41c7-b103-544d27100d8e",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlComputeJobEvent\n| where ClusterId contains \"cpu-cluster-stg\"\n| where EventType == \"JobSucceeded\" or EventType == \"JobFailed\"\n| summarize TotalJobs = count(), Exitosos = countif(EventType == \"JobSucceeded\"), Fallidos = countif(EventType == \"JobFailed\") by bin(TimeGenerated, 1d)\n| render table\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🤖 Resumen diario de jobs (últimos 30 días)",
+              "subtitle": ""
             }
           }
-          # Latencia staging
-          "2" = {
-            position = { x = 8, y = 10, colSpan = 4, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"${var.endpoint_name}\"\n| summarize LatenciaMedia = avg(RequestDurationMs) by bin(TimeGenerated, 1h)\n| render timechart" },
-                { name = "TimeRange", value = "P1D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "🌐 Latencia media staging (ms)" },
-                { name = "PartSubTitle", value = "Umbral de aviso: 2000ms" }
-              ]
+        },
+        "8": {
+          "position": {
+            "x": 0,
+            "y": 8,
+            "colSpan": 15,
+            "rowSpan": 1
+          },
+          "metadata": {
+            "inputs": [],
+            "type": "Extension/HubsExtension/PartType/MarkdownPart",
+            "settings": {
+              "content": {
+                "content": "---",
+                "title": "🌐 ENDPOINTS",
+                "subtitle": "Staging · Producción · Latencia",
+                "markdownSource": 1,
+                "markdownUri": ""
+              }
             }
           }
-        }
-      }
-      # ── Sección 4: COSTES ───────────────────────────────
-      "3" = {
-        order = 3
-        parts = {
-          # Resumen coste indirecto por jobs
-          "0" = {
-            position = { x = 0, y = 14, colSpan = 12, rowSpan = 4 }
-            metadata = {
-              type = "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-              inputs = [
-                { name = "resourceTypeMode", isOptional = true, value = "workspace" },
-                { name = "ComponentId", isOptional = true, value = { SubscriptionId = "", ResourceGroup = var.workload_resource_group_name, Name = "", ResourceId = var.log_analytics_workspace_id } },
-                { name = "Query", value = "AmlComputeJobEvent\n| where ClusterId contains \"${var.compute_cluster_name}\"\n| where EventType == \"JobSucceeded\" or EventType == \"JobFailed\"\n| extend DuracionMin = todouble(split(tostring(parse_json(Details).runDuration), \":\")[1])\n| summarize TotalJobs = count(), TiempoTotalMin = sum(DuracionMin) by bin(TimeGenerated, 1d)\n| render table" },
-                { name = "TimeRange", value = "P30D" },
-                { name = "Version", value = "2.0" },
-                { name = "PartTitle", value = "💰 Tiempo de cómputo utilizado (últimos 30 días)" },
-                { name = "PartSubTitle", value = "Total jobs · Tiempo total en minutos" }
-              ]
+        },
+        "9": {
+          "position": {
+            "x": 0,
+            "y": 9,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "1146b819-5d5d-4651-8e32-a253a711c6dd",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"iris-endpoint-stg-weu-01\"\n| summarize Peticiones = count() by bin(TimeGenerated, 1h)\n| render timechart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🌐 Peticiones al endpoint staging (últimas 24h)",
+              "subtitle": ""
+            }
+          }
+        },
+        "10": {
+          "position": {
+            "x": 5,
+            "y": 9,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "1517f35d-1254-4dcd-8151-240e7329155e",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"iris-endpoint-stg-weu-01\"\n| summarize LatenciaMedia = avg(RequestDurationMs) by bin(TimeGenerated, 1h)\n| render timechart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🌐 Latencia media endpoint staging (ms)",
+              "subtitle": ""
+            }
+          }
+        },
+        "11": {
+          "position": {
+            "x": 10,
+            "y": 9,
+            "colSpan": 5,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "0b334f9f-0a0d-400a-b412-43b7f962fdf4",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlOnlineEndpointTrafficLog\n| where EndpointName == \"iris-endpoint-stg-weu-01\"\n| summarize Total = count(), Errores = countif(ResponseCode >= 500) by bin(TimeGenerated, 1h)\n| extend TasaErrores = (Errores * 100.0) / Total\n| project TimeGenerated, TasaErrores\n| render timechart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "🌐 Tasa de errores endpoint staging (%)",
+              "subtitle": ""
+            }
+          }
+        },
+        "12": {
+          "position": {
+            "x": 0,
+            "y": 12,
+            "colSpan": 15,
+            "rowSpan": 1
+          },
+          "metadata": {
+            "inputs": [],
+            "type": "Extension/HubsExtension/PartType/MarkdownPart",
+            "settings": {
+              "content": {
+                "content": "---\n",
+                "title": "💰 COSTES",
+                "subtitle": "Cómputo utilizado · Presupuesto",
+                "markdownSource": 1,
+                "markdownUri": ""
+              }
+            }
+          }
+        },
+        "13": {
+          "position": {
+            "x": 0,
+            "y": 13,
+            "colSpan": 15,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/e19e0ebc-a9ed-4d6f-985f-f0a9fb8b544b/resourceGroups/rg-hub/providers/Microsoft.OperationalInsights/workspaces/log-hub-weu-01"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "78c2dbf9-354a-4b8a-9123-7e1a7a125348",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P1D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "AmlComputeJobEvent\n| where ClusterId contains \"cpu-cluster-stg\"\n| where EventType == \"JobSucceeded\" or EventType == \"JobFailed\"\n| summarize TotalJobs = count() by bin(TimeGenerated, 1d)\n| render timechart\n",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "AnalyticsGrid",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Analytics",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "log-hub-weu-01",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {},
+            "partHeader": {
+              "title": "💰 Jobs de entrenamiento ejecutados (últimos 30 días)",
+              "subtitle": ""
             }
           }
         }
       }
     }
-    metadata = {
-      model = {
-        timeRange = {
-          value = { relative = { duration = 24, timeUnit = 1 } }
-          type  = "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+  },
+  "metadata": {
+    "model": {
+      "timeRange": {
+        "value": {
+          "relative": {
+            "duration": 24,
+            "timeUnit": 1
+          }
+        },
+        "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+      },
+      "filterLocale": {
+        "value": "en-us"
+      },
+      "filters": {
+        "value": {
+          "MsPortalFx_TimeRange": {
+            "model": {
+              "format": "utc",
+              "granularity": "auto",
+              "relative": "24h"
+            },
+            "displayCache": {
+              "name": "UTC Time",
+              "value": "Past 24 hours"
+            },
+            "filteredPartIds": [
+              "StartboardPart-MonitorChartPart-69931583-9434-4b70-8ad6-b3842a95b609",
+              "StartboardPart-MonitorChartPart-69931583-9434-4b70-8ad6-b3842a95b60b",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b60d",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b611",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b613",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b615",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b617",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b619",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b61b",
+              "StartboardPart-LogsDashboardPart-69931583-9434-4b70-8ad6-b3842a95b61d"
+            ]
+          }
         }
-        filterLocale = { value = "en-us" }
-        filters      = { value = { MsPortalFx_TimeRange = { model = { format = "utc", granularity = "auto", relative = "24h" }, displayCache = { name = "UTC Time", value = "Past 24 hours" }, filteredPartIds = [] } } }
       }
     }
-  })
+  }
+})
 }
