@@ -7,7 +7,15 @@ resource "azurerm_storage_account" "this" {
   account_kind                    = "StorageV2"
   min_tls_version                 = "TLS1_2"
   public_network_access_enabled   = !var.enable_private_networking
-  # Azure ML workspace default storage cannot use HNS-enabled accounts.
   is_hns_enabled                  = false
   tags                            = var.tags
+
+  blob_properties {
+    delete_retention_policy {
+      days = var.soft_delete_retention_days
+    }
+    container_delete_retention_policy {
+      days = var.soft_delete_retention_days
+    }
+  }
 }
